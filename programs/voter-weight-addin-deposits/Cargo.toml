@@ -1,12 +1,12 @@
 [package]
-name = "governance-registry"
+name = "voter-weight-addin-deposits"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2018"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "governance_registry"
+name = "voter_weight_addin_deposits"
 
 [features]
 no-entrypoint = []

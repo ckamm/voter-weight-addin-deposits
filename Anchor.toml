@@ -1,5 +1,5 @@
 [programs.localnet]
-governance_registry = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+voter_weight_addin_deposits = "HoVX43xherfXV6RUoLmcoLA1XSyd9SbF4V1Edpi2QbLY"
 
 [provider]
 cluster = "localnet"
