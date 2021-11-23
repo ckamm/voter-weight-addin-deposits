@@ -112,6 +112,8 @@ pub mod voter_weight_addin_deposits {
         let registrar = &ctx.accounts.registrar.load()?;
         let voter = &mut ctx.accounts.voter.load_mut()?;
 
+        require!(amount <= voter.amount_deposited, ErrorCode::InsufficientVestedTokens);
+
         // Update deposit book keeping.
         voter.amount_deposited -= amount;
 
