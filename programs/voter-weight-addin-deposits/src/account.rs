@@ -11,6 +11,7 @@ vote_weight_record!(crate::ID);
 #[account(zero_copy)]
 pub struct Registrar {
     pub authority: Pubkey,
+    pub governance_program_id: Pubkey,
     pub realm: Pubkey,
     pub realm_community_mint: Pubkey,
     pub bump: u8,
@@ -24,6 +25,9 @@ pub struct Voter {
     pub voter_bump: u8,
     pub voter_weight_record_bump: u8,
     pub amount_deposited: u64,
+    // Would like to use solana_program::clock::Slot here, but Anchor's IDL
+    // does not know the type.
+    pub last_deposit_slot: u64,
 }
 
 impl Voter {
@@ -31,4 +35,3 @@ impl Voter {
         Ok(self.amount_deposited)
     }
 }
-

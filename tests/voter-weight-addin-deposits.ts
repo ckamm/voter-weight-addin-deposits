@@ -23,6 +23,7 @@ describe("voting-rights", () => {
     .VoterWeightAddinDeposits as Program<VoterWeightAddinDeposits>;
 
   // Initialized variables shared across tests.
+  const governanceProgramId = new PublicKey("GovernanceProgram11111111111111111111111111");
   const realm = Keypair.generate().publicKey;
   const votingMintDecimals = 6;
   const tokenProgram = TOKEN_PROGRAM_ID;
@@ -105,6 +106,7 @@ describe("voting-rights", () => {
     await program.rpc.createRegistrar(registrarBump, {
       accounts: {
         registrar,
+        governanceProgramId,
         realm,
         realmCommunityMint,
         authority: program.provider.wallet.publicKey,

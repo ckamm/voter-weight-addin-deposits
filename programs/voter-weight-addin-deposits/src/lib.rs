@@ -44,12 +44,10 @@ pub mod voter_weight_addin_deposits {
 
     /// Creates a new voting registrar. There can only be a single regsitrar
     /// per governance realm.
-    pub fn create_registrar(
-        ctx: Context<CreateRegistrar>,
-        registrar_bump: u8,
-    ) -> Result<()> {
+    pub fn create_registrar(ctx: Context<CreateRegistrar>, registrar_bump: u8) -> Result<()> {
         let registrar = &mut ctx.accounts.registrar.load_init()?;
         registrar.bump = registrar_bump;
+        registrar.governance_program_id = ctx.accounts.governance_program_id.key();
         registrar.realm = ctx.accounts.realm.key();
         registrar.realm_community_mint = ctx.accounts.realm_community_mint.key();
         registrar.authority = ctx.accounts.authority.key();
@@ -85,14 +83,12 @@ pub mod voter_weight_addin_deposits {
     }
 
     /// Creates a new deposit entry and updates it by transferring in tokens.
-    pub fn deposit(
-        ctx: Context<Deposit>,
-        amount: u64,
-    ) -> Result<()> {
+    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         // Load accounts.
         let voter = &mut ctx.accounts.voter.load_mut()?;
 
         voter.amount_deposited += amount;
+        voter.last_deposit_slot = Clock::get()?.slot;
 
         // Deposit tokens into the registrar.
         token::transfer(ctx.accounts.transfer_ctx(), amount)?;
@@ -104,15 +100,38 @@ pub mod voter_weight_addin_deposits {
     ///
     /// `amount` is in units of the native currency being withdrawn.
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-        // TODO:
-        // 1. Do not allow withdraws while the voter has voted on something!
-        // 2. Do not allow withdraws in the same slot as deposits!
-
         // Load the accounts.
         let registrar = &ctx.accounts.registrar.load()?;
         let voter = &mut ctx.accounts.voter.load_mut()?;
 
-        require!(amount <= voter.amount_deposited, ErrorCode::InsufficientVestedTokens);
+        // Governance may forbid withdraws, for example when engaged in a vote.
+        let token_owner = ctx.accounts.authority.key();
+        use spl_governance::state::token_owner_record;
+        let token_owner_record_address_seeds =
+            token_owner_record::get_token_owner_record_address_seeds(
+                &registrar.realm,
+                &registrar.realm_community_mint,
+                &token_owner,
+            );
+        let token_owner_record_data = token_owner_record::get_token_owner_record_data_for_seeds(
+            &registrar.governance_program_id,
+            &ctx.accounts.token_owner_record.to_account_info(),
+            &token_owner_record_address_seeds,
+        )?;
+        token_owner_record_data.assert_can_withdraw_governing_tokens()?;
+
+        // Must not withdraw in the same slot as depositing, to prevent people
+        // depositing, having the vote weight updated, withdrawing and then
+        // voting.
+        require!(
+            voter.last_deposit_slot < Clock::get()?.slot,
+            ErrorCode::InvalidToDepositAndWithdrawInOneSlot
+        );
+
+        require!(
+            amount <= voter.amount_deposited,
+            ErrorCode::InsufficientVestedTokens
+        );
 
         // Update deposit book keeping.
         voter.amount_deposited -= amount;
