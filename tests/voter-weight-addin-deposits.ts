@@ -16,6 +16,10 @@ import {
 } from "@solana/spl-token";
 import { VoterWeightAddinDeposits } from "../target/types/voter_weight_addin_deposits";
 
+const SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey(
+  "Sysvar1nstructions1111111111111111111111111"
+);
+
 describe("voting-rights", () => {
   anchor.setProvider(anchor.Provider.env());
 
@@ -133,6 +137,7 @@ describe("voting-rights", () => {
         associatedTokenProgram,
         tokenProgram,
         rent,
+        instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       },
     });
   });

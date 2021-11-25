@@ -34,4 +34,6 @@ pub enum ErrorCode {
     InvalidTokenRecordOwner,
     #[msg("")]
     InvalidToDepositAndWithdrawInOneSlot,
+    #[msg("")]
+    ForbiddenCpi,
 }
