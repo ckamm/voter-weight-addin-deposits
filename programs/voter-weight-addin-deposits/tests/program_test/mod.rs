@@ -9,11 +9,13 @@ use solana_sdk::{
 };
 use spl_token::{state::*, *};
 
+pub use addin::*;
 pub use cookies::*;
 pub use governance::*;
 pub use solana::*;
 pub use utils::*;
 
+pub mod addin;
 pub mod cookies;
 pub mod governance;
 pub mod solana;
@@ -46,7 +48,7 @@ impl AddPacked for ProgramTest {
 pub struct TestContext {
     pub solana: Arc<SolanaCookie>,
     pub governance: GovernanceCookie,
-    pub addin: Pubkey,
+    pub addin: AddinCookie,
     pub mints: Vec<MintCookie>,
     pub users: Vec<UserCookie>,
     pub quote_index: usize,
@@ -54,8 +56,7 @@ pub struct TestContext {
 
 impl TestContext {
     pub async fn new() -> Self {
-        let addin_program_id =
-            Pubkey::from_str(&"Addin11111111111111111111111111111111111111").unwrap();
+        let addin_program_id = voter_weight_addin_deposits::id();
 
         let mut test = ProgramTest::new(
             "voter_weight_addin_deposits",
@@ -181,7 +182,10 @@ impl TestContext {
                 solana: solana.clone(),
                 program_id: governance_program_id,
             },
-            addin: addin_program_id,
+            addin: AddinCookie {
+                solana: solana.clone(),
+                program_id: addin_program_id,
+            },
             mints,
             users,
             quote_index,

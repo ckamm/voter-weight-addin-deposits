@@ -1,12 +1,7 @@
-use std::{mem, sync::Arc};
+use std::sync::Arc;
 
-use bytemuck::from_bytes;
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult};
 use solana_sdk::pubkey::Pubkey;
-use solana_sdk::{
-    instruction::Instruction,
-    signature::{Keypair, Signer},
-};
+use solana_sdk::signature::{Keypair, Signer};
 
 use crate::*;
 
@@ -19,6 +14,7 @@ pub struct GovernanceCookie {
 #[derive(Clone)]
 pub struct GovernanceRealmCookie {
     pub governance: GovernanceCookie,
+    pub authority: Pubkey,
     pub realm: Pubkey,
     pub realm_config: Pubkey,
     pub community_token_mint: MintCookie,
@@ -80,6 +76,7 @@ impl GovernanceCookie {
 
         GovernanceRealmCookie {
             governance: self.clone(),
+            authority: realm_authority,
             realm,
             realm_config,
             community_token_mint: community_token_mint.clone(),

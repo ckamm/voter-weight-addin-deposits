@@ -29,12 +29,13 @@ pub struct CreateRegistrar<'info> {
         init,
         payer = payer,
         associated_token::authority = registrar,
-        associated_token::mint = deposit_mint,
+        associated_token::mint = realm_community_mint,
     )]
-    pub exchange_vault: Account<'info, TokenAccount>,
-    pub deposit_mint: Account<'info, Mint>,
+    pub vault: Account<'info, TokenAccount>,
 
+    #[account(mut)]
     pub payer: Signer<'info>,
+
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -63,8 +64,14 @@ pub struct CreateVoter<'info> {
     pub voter_weight_record: Account<'info, VoterWeightRecord>,
 
     pub registrar: AccountLoader<'info, Registrar>,
+
+    // TODO: Why is authority and payer different? Is it necessary that Voter and VoterWeightRecord are paid for differently?
+    #[account(mut)]
     pub authority: Signer<'info>,
+
+    #[account(mut)]
     pub payer: Signer<'info>,
+
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
@@ -86,7 +93,7 @@ pub struct Deposit<'info> {
         associated_token::authority = registrar,
         associated_token::mint = deposit_mint,
     )]
-    pub exchange_vault: Account<'info, TokenAccount>,
+    pub vault: Account<'info, TokenAccount>,
     pub deposit_mint: Account<'info, Mint>,
 
     #[account(
@@ -107,7 +114,7 @@ impl<'info> Deposit<'info> {
         let program = self.token_program.to_account_info();
         let accounts = token::Transfer {
             from: self.deposit_token.to_account_info(),
-            to: self.exchange_vault.to_account_info(),
+            to: self.vault.to_account_info(),
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(program, accounts)
@@ -128,7 +135,7 @@ pub struct Withdraw<'info> {
         associated_token::authority = registrar,
         associated_token::mint = withdraw_mint,
     )]
-    pub exchange_vault: Account<'info, TokenAccount>,
+    pub vault: Account<'info, TokenAccount>,
     pub withdraw_mint: Account<'info, Mint>,
 
     #[account(mut)]
@@ -142,7 +149,7 @@ impl<'info> Withdraw<'info> {
     pub fn transfer_ctx(&self) -> CpiContext<'_, '_, '_, 'info, token::Transfer<'info>> {
         let program = self.token_program.to_account_info();
         let accounts = token::Transfer {
-            from: self.exchange_vault.to_account_info(),
+            from: self.vault.to_account_info(),
             to: self.destination.to_account_info(),
             authority: self.registrar.to_account_info(),
         };
