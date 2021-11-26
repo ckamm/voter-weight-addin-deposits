@@ -70,7 +70,10 @@ pub mod voter_weight_addin_deposits {
             let ixns = ctx.accounts.instructions.to_account_info();
             let current_index = tx_instructions::load_current_index_checked(&ixns)? as usize;
             let current_ixn = tx_instructions::load_instruction_at_checked(current_index, &ixns)?;
-            require!(current_ixn.program_id == *ctx.program_id, ErrorCode::ForbiddenCpi);
+            require!(
+                current_ixn.program_id == *ctx.program_id,
+                ErrorCode::ForbiddenCpi
+            );
         }
 
         // Load accounts.

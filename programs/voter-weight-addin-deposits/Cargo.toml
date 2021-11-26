@@ -7,14 +7,24 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "voter_weight_addin_deposits"
+doctest = false
 
 [features]
 no-entrypoint = []
 no-idl = []
 cpi = ["no-entrypoint"]
 default = []
+test-bpf = []
 
 [dependencies]
 anchor-lang = "0.18.0"
-anchor-spl = "0.18.0"
+anchor-spl = { version = "0.18.0", features = ["governance"] }
 spl-governance = { git = "https://github.com/solana-labs/solana-program-library", features = ["no-entrypoint"] }
+
+[dev-dependencies]
+solana-sdk = "^1.8.1"
+solana-program-test = "^1.8.1"
+solana-logger = "^1.8.1"
+solana-program = "^1.8.1"
+spl-token = { version = "^3.0.0", features = ["no-entrypoint"] }
+bytemuck = "^1.7.2"
