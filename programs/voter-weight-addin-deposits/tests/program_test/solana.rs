@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 
 use anchor_lang::AccountDeserialize;
+use anchor_spl::token::TokenAccount;
 use solana_program::{program_pack::Pack, rent::*, system_instruction};
 use solana_program_test::*;
 use solana_sdk::{
@@ -123,5 +124,11 @@ impl SolanaCookie {
         let data = self.get_account_data(address).await;
         let mut data_slice: &[u8] = &data;
         AccountDeserialize::try_deserialize(&mut data_slice).unwrap()
+    }
+
+    pub async fn token_account_balance(&self, address: Pubkey) -> u64 {
+        self
+        .get_account::<TokenAccount>(address)
+        .await.amount
     }
 }

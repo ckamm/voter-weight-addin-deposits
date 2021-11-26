@@ -1,3 +1,4 @@
+use anchor_spl::token::TokenAccount;
 use solana_program_test::*;
 use solana_sdk::{signature::Keypair, signer::Signer, transport::TransportError};
 
@@ -34,16 +35,46 @@ async fn test_basic() -> Result<(), TransportError> {
         .create_voter(&registrar, &voter_authority, &payer)
         .await;
 
+    // test deposit and withdraw
+
+    let reference_account = context.users[1].token_accounts[0];
+    let reference_initial = context
+        .solana.token_account_balance(reference_account).await;
+    let vault_initial = registrar.vault_balance(&context.solana).await;
+    assert_eq!(vault_initial, 0);
+    let balance_initial = voter.deposit_amount(&context.solana).await;
+    assert_eq!(balance_initial, 0);
+
     context
         .addin
         .deposit(
             &registrar,
             &voter,
             &voter_authority,
-            context.users[1].token_accounts[0],
+            reference_account,
             10000,
         )
         .await?;
+
+    let reference_after_deposit = context
+        .solana.token_account_balance(reference_account).await;
+    assert_eq!(reference_initial, reference_after_deposit + 10000);
+    let vault_after_deposit = registrar.vault_balance(&context.solana).await;
+    assert_eq!(vault_after_deposit, 10000);
+    let balance_after_deposit = voter.deposit_amount(&context.solana).await;
+    assert_eq!(balance_after_deposit, 10000);
+
+    context
+        .addin
+        .withdraw(
+            &registrar,
+            &voter,
+            &token_owner_record,
+            &voter_authority,
+            reference_account,
+            10000,
+        )
+        .await.expect_err("fails because a deposit happened in the same slot");
 
     // Must advance slots because withdrawing in the same slot as the deposit is forbidden
     context.solana.advance_clock_by_slots(2).await;
@@ -55,10 +86,18 @@ async fn test_basic() -> Result<(), TransportError> {
             &voter,
             &token_owner_record,
             &voter_authority,
-            context.users[1].token_accounts[0],
+            reference_account,
             10000,
         )
         .await?;
+
+    let reference_after_withdraw = context
+        .solana.token_account_balance(reference_account).await;
+    assert_eq!(reference_initial, reference_after_withdraw);
+    let vault_after_withdraw = registrar.vault_balance(&context.solana).await;
+    assert_eq!(vault_after_withdraw, 0);
+    let balance_after_withdraw = voter.deposit_amount(&context.solana).await;
+    assert_eq!(balance_after_withdraw, 0);
 
     Ok(())
 }

@@ -114,8 +114,7 @@ describe("voting-rights", () => {
         realm,
         realmCommunityMint,
         authority: program.provider.wallet.publicKey,
-        exchangeVault,
-        depositMint: mintA,
+        vault: exchangeVault,
         payer: program.provider.wallet.publicKey,
         systemProgram,
         tokenProgram,
@@ -148,14 +147,11 @@ describe("voting-rights", () => {
       accounts: {
         registrar,
         voter,
-        exchangeVault: exchangeVault,
+        vault: exchangeVault,
         depositMint: mintA,
         depositToken: godA,
         authority: program.provider.wallet.publicKey,
         tokenProgram,
-        associatedTokenProgram,
-        systemProgram,
-        rent,
       },
     });
 
@@ -169,14 +165,11 @@ describe("voting-rights", () => {
       accounts: {
         registrar,
         voter,
-        exchangeVault: exchangeVault,
+        vault: exchangeVault,
         depositMint: mintA,
         depositToken: godA,
         authority: program.provider.wallet.publicKey,
         tokenProgram,
-        associatedTokenProgram,
-        systemProgram,
-        rent,
       },
     });
 

@@ -104,9 +104,6 @@ pub struct Deposit<'info> {
 
     pub authority: Signer<'info>,
     pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> Deposit<'info> {

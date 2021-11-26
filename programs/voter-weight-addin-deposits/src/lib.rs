@@ -4,7 +4,7 @@ use context::*;
 use error::*;
 use spl_governance::addins::voter_weight::VoterWeightAccountType;
 
-mod account;
+pub mod account;
 mod context;
 mod error;
 

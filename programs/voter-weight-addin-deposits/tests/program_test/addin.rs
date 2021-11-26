@@ -163,9 +163,6 @@ impl AddinCookie {
                 deposit_token: token_address,
                 authority: authority.pubkey(),
                 token_program: spl_token::id(),
-                associated_token_program: spl_associated_token_account::id(),
-                system_program: solana_sdk::system_program::id(),
-                rent: solana_program::sysvar::rent::id(),
             },
             None,
         );
@@ -221,5 +218,21 @@ impl AddinCookie {
         self.solana
             .process_transaction(&instructions, Some(&[&signer]))
             .await
+    }
+}
+
+impl RegistrarCookie {
+    pub async fn vault_balance(&self, solana: &SolanaCookie) -> u64 {
+        solana
+        .get_account::<TokenAccount>(self.vault)
+        .await.amount
+    }
+}
+
+impl VoterCookie {
+    pub async fn deposit_amount(&self, solana: &SolanaCookie) -> u64 {
+        solana
+        .get_account::<addin::account::Voter>(self.address)
+        .await.amount_deposited
     }
 }
